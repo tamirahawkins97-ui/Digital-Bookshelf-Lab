@@ -1,1 +1,1 @@
-# Mongoose Models and Schemas Lab
+# Digital Bookshelf Lab
