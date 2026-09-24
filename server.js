@@ -7,8 +7,13 @@ const PORT = process.env.PORT || 2121;
 const mongoose = require('mongoose');
 
 //DATABASE CONNECTION 
-require('./db/connection'); 
+const connectDB = require('./db/connection'); 
+
+connectDB();
+
 //MIDDLEWARE
+app.use(express.urlencoded({extended: true}))
+app.use(express.json());
 
 //PORT
 app.listen(PORT,(req,res) => {
