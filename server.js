@@ -11,11 +11,14 @@ const connectDB = require('./db/connection');
 
 connectDB();
 
+
 //MIDDLEWARE
 app.use(express.urlencoded({extended: true}))
 app.use(express.json());
-
+//Mount Router
+const mangaRoutes = require('./routes/MangaRoutes')
+app.use('/mangas', mangaRoutes)
 //PORT
-app.listen(PORT,(req,res) => {
+app.listen(PORT, () => {
     console.log(`Server is running on port: http://localhost:${PORT}`)
 });
