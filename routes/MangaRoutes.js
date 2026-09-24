@@ -1,86 +1,83 @@
-//DEPENDANCIES 
+// DEPENDENCIES 
 const express = require('express');
-const router = express.Router()
+const router = express.Router();
 const Manga = require('../models/Manga');
-//ROUTES
-//I.N.D.U.C.E.S
 
-//Index - Lists all mangas
-router.get('/', async (req,res) =>{
-    try {
-        const allMangas = await Manga.find()
-        res.status(200).json(allMangas)
+// ROUTES (I.N.D.U.C.E.S)
 
-    } catch (error){
-        console.error(error)
-        res.status(500).send("UNABLE TO FETCH ALL MANGAS :(")
-    }
+// Index - Lists all mangas (GET /mangas)
+router.get('/', async (req, res) => {
+  try {
+    const allMangas = await Manga.find();
+    res.status(200).json(allMangas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Unable to fetch all mangas" });
+  }
 });
 
-// GET/:id Read only one by id.
+// Read One by ID (GET /mangas/:id)
+router.get('/:id', async (req, res) => {
+  try {
+    const manga = await Manga.findById(req.params.id);
 
-router.get('/:id', async (req,res)=>{
-    try{
-        const manga = await Manga.findById(req.params.id)
-        // If no document matches the provided _id
-        if(!manga){
-            res.status(404).json({ message: "Manga Not Found :/"})
-        }
-
-        // Return the found manga
-        res.status(200).json(manga)
-        
-    } catch(error) {
-        console.error()
-    res.status(500).send(`Unable to fetch Manga: ${req.params.id}.`)
+    // Guard clause: Return early if not found
+    if (!manga) {
+      return res.status(404).json({ message: "Manga Not Found :/" });
     }
 
+    res.status(200).json(manga);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: `Unable to fetch manga with ID: ${req.params.id}` });
+  }
 });
-//New - Generate a form for the creation of a new manga 
 
+// Delete (DELETE /mangas/:id)
+router.delete('/:id', async (req, res) => {
+  try {
+    const deletedManga = await Manga.findByIdAndDelete(req.params.id);
 
-//Delete -  posting nothing that was stored 
-
-router.delete('/:id', async (req,res) =>{
-    try{
-        await Manga.findByIdAndDelete(req.params.id)
-        res.send('Manga deleted successfully.')
-    } catch (error) {
-        console.error(error)
-        res.status(500)
+    if (!deletedManga) {
+      return res.status(404).json({ message: "Manga not found to delete" });
     }
-})
 
-// Update - Update a manga (PUT /mangas/:id)
+    res.status(200).json({ message: 'Manga deleted successfully.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
+// Update (PUT /mangas/:id)
 router.put('/:id', async (req, res) => {
-    try {
-        const newManga = await Manga.findByIdAndUpdate(req.params.id,
-        req.body,
-        {new: true} 
-        ).exec();
-        res.status(200).json(newManga)
+  try {
+    const updatedManga = await Manga.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true } // runValidators ensures updates obey schema rules
+    );
 
-    } catch(error){
-        console.error(error)
-        res.status(500).send("There seems to be an issue with the update.")
+    if (!updatedManga) {
+      return res.status(404).json({ message: "Manga not found to update" });
     }
+
+    res.status(200).json(updatedManga);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: error.message });
+  }
 });
 
-
-// Create - Make a manga! (POST /mangas)
-
+// Create (POST /mangas)
 router.post('/', async (req, res) => {
   try {
     const createdManga = await Manga.create(req.body);
     res.status(201).json(createdManga);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    res.status(400).json({ error: error.message });
   }
 });
-
-//E
-
-//S
 
 module.exports = router;
